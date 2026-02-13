@@ -1,126 +1,151 @@
-(function($) {
+/* ===============================
+   MODERN SCROLL ANIMATIONS
+================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* --------------------------------
+     Smooth Scroll (No jQuery)
+  -------------------------------- */
+  document.querySelectorAll('a.js-scroll-trigger[href^="#"]').forEach(link => {
+    link.addEventListener("click", e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute("href"));
+      if (!target) return;
+
+      window.scrollTo({
+        top: target.offsetTop - 70,
+        behavior: "smooth"
+      });
+
+      document.querySelector(".navbar-collapse")?.classList.remove("show");
+    });
+  });
+
+  /* --------------------------------
+     ScrollSpy (Pure JS)
+  -------------------------------- */
+  const sections = document.querySelectorAll("section");
+  const navLinks = document.querySelectorAll("#sideNav .nav-link");
+
+  const spyObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.toggle(
+            "active",
+            link.getAttribute("href") === `#${entry.target.id}`
+          );
+        });
+      }
+    });
+  }, { threshold: 0.6 });
+
+  sections.forEach(section => spyObserver.observe(section));
+
+  /* --------------------------------
+     GLOBAL REVEAL OBSERVER
+  -------------------------------- */
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("animate-in");
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll(
+    ".resume-section, .resume-item .card, .social-impact-box, .award"
+  ).forEach(el => {
+    el.classList.add("animate");
+    revealObserver.observe(el);
+  });
+
+  /* --------------------------------
+     STAGGER: EXPERIENCE CARDS
+  -------------------------------- */
+  const experienceSection = document.querySelector("#experience");
+  if (experienceSection) {
+    const cards = experienceSection.querySelectorAll(".resume-item .card");
+
+    const expObserver = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        cards.forEach((card, i) => {
+          setTimeout(() => card.classList.add("animate-in"), i * 150);
+        });
+        expObserver.disconnect();
+      }
+    }, { threshold: 0.3 });
+
+    expObserver.observe(experienceSection);
+  }
+
+  /* --------------------------------
+     STAGGER: AWARDS TIMELINE
+  -------------------------------- */
+  const awardsSection = document.querySelector("#awards");
+  if (awardsSection) {
+    const awards = awardsSection.querySelectorAll(".award");
+
+    const awardsObserver = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        awards.forEach((award, i) => {
+          setTimeout(() => award.classList.add("animate-in"), i * 120);
+        });
+        awardsObserver.disconnect();
+      }
+    }, { threshold: 0.3 });
+
+    awardsObserver.observe(awardsSection);
+  }
+
+  /* --------------------------------
+     Hover Lift (No jQuery)
+  -------------------------------- */
+  document.querySelectorAll(
+    ".resume-item .card, .social-impact-box, .award"
+  ).forEach(el => {
+    el.addEventListener("mouseenter", () => el.classList.add("hover-lift"));
+    el.addEventListener("mouseleave", () => el.classList.remove("hover-lift"));
+  });
+
+});
+/* =====================================
+   AWARD HOVER INTERACTION (SMART)
+===================================== */
+
+(function ($) {
   "use strict";
 
-  // Smooth scrolling using jQuery easing
-  $('a.js-scroll-trigger[href*="#"]:not([href="#"])').click(function() {
-    if (location.pathname.replace(/^\//, '') == this.pathname.replace(/^\//, '') && location.hostname == this.hostname) {
-      var target = $(this.hash);
-      target = target.length ? target : $('[name=' + this.hash.slice(1) + ']');
-      if (target.length) {
-        $('html, body').animate({
-          scrollTop: (target.offset().top - 70) // Adjust for fixed navbar
-        }, 1200, "easeInOutExpo");
-        return false;
-      }
+  const isDesktop = () => window.innerWidth > 768;
+
+  $('.award').each(function () {
+    const $award = $(this);
+    const $detail = $award.find('.award-detail');
+
+    if (!$detail.length) return;
+
+    // Desktop hover behavior
+    $award.on('mouseenter', function () {
+      if (!isDesktop()) return;
+
+      $('.award-detail').not($detail).removeClass('active');
+      $detail.addClass('active');
+    });
+
+    $award.on('mouseleave', function () {
+      if (!isDesktop()) return;
+      $detail.removeClass('active');
+    });
+  });
+
+  // Optional: ESC closes any open panel
+  $(document).on('keydown', function (e) {
+    if (e.key === "Escape") {
+      $('.award-detail').removeClass('active');
     }
   });
-
-  // Closes responsive menu when a scroll trigger link is clicked
-  $('.js-scroll-trigger').click(function() {
-    $('.navbar-collapse').collapse('hide');
-  });
-
-  // Activate scrollspy to add active class to navbar items on scroll
-  $('body').scrollspy({
-    target: '#sideNav',
-    offset: 80
-  });
-
-  // 🔥 SCROLL ANIMATIONS & REVEALS
-  function animateOnScroll() {
-    $('.resume-section, .social-impact-box, .impact-item').each(function() {
-      var elementTop = $(this).offset().top;
-      var elementVisible = 150;
-      
-      if ($(window).scrollTop() + $(window).height() > elementTop + elementVisible) {
-        $(this).addClass('animate-in');
-      }
-    });
-  }
-
-  // Trigger animations on scroll
-  $(window).scroll(animateOnScroll);
-  animateOnScroll(); // Initial check
-
-  // 🔥 COUNTER ANIMATIONS (Leadership Impact)
-  function startCounters() {
-    if ($('.counter').hasClass('animated')) return;
-    
-    $('.counter').each(function() {
-      var $this = $(this);
-      var elementTop = $this.closest('.impact-item, #impact').offset().top;
-      
-      if ($(window).scrollTop() + $(window).height() > elementTop) {
-        $this.counterUp({
-          delay: 10,
-          time: 2000,
-          beginAt: 0
-        });
-        $this.addClass('animated');
-      }
-    });
-  }
-
-  $(window).scroll(startCounters);
-  $(window).on('load', startCounters);
-
-  // 🔥 STAGGERED SOCIAL IMPACT BOXES
-  function staggerSocialBoxes() {
-    $('.social-impact-box').each(function(index) {
-      var $box = $(this);
-      if (!$box.hasClass('animated')) {
-        setTimeout(() => {
-          $box.addClass('animate-in');
-        }, index * 200);
-      }
-    });
-  }
-
-  // Trigger stagger on scroll into view
-  $('.social-impact-box').each(function() {
-    var $box = $(this);
-    var elementTop = $box.offset().top;
-    
-    if ($(window).scrollTop() + $(window).height() > elementTop) {
-      staggerSocialBoxes();
-    }
-  });
-
-  // 🔥 HOVER EFFECTS
-  $('.resume-item .card, .social-impact-box, .award').hover(
-    function() {
-      $(this).addClass('hover-lift');
-    },
-    function() {
-      $(this).removeClass('hover-lift');
-    }
-  );
-
-  // 🔥 EXPERIENCE CARDS STAGGER
-  function staggerExperienceCards() {
-    $('.resume-item').each(function(index) {
-      var $card = $(this).find('.card');
-      if (!$card.hasClass('animated')) {
-        setTimeout(() => {
-          $card.addClass('animate-in');
-        }, index * 150);
-      }
-    });
-  }
-
-  // Trigger on scroll
-  $('#experience').waypoint(function() {
-    staggerExperienceCards();
-  }, { offset: '80%' });
-
-  // 🔥 AWARDS STAGGER
-  $('#awards').waypoint(function() {
-    $('.award').each(function(index) {
-      var $award = $(this);
-      setTimeout(() => {
-        $award.addClass('animate-in');
-      }, index * 100);
-    });
-  }, { offset: '80%' });
 
 })(jQuery);
+
