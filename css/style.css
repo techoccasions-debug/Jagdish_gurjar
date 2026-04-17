@@ -133,7 +133,13 @@ a:hover { color: #0f72c1; }
   min-height: 100vh;
   display: flex;
   align-items: center;
-  
+}
+
+/* 🔥 Mobile Fix */
+@media (max-width: 768px) {
+  #about {
+    background-position: right center;
+  }
 }
 
 #about::before {
