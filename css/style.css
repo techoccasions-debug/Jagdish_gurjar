@@ -169,6 +169,7 @@ a:hover { color: #0f72c1; }
   position: relative;
   z-index: 2;
 }
+
 /* ===============================
    EXPERIENCE SECTION
 ================================ */
@@ -647,4 +648,31 @@ a:hover { color: #0f72c1; }
   .award-content p {
     font-size: 0.9rem;
   }
+}
+.glass-box {
+  background: rgba(255, 255, 255, 0.25); /* transparent white */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* for Safari */
+  
+  border-radius: 12px;
+  padding: 20px;
+  
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  
+  max-width: 500px;
+}
+@media (max-width: 768px) {
+  .glass-box {
+    padding: 15px;
+    backdrop-filter: blur(8px); /* lighter for performance */
+  }
+}
+.glass-box {
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.2),
+    rgba(255,255,255,0.05)
+  );
 }
